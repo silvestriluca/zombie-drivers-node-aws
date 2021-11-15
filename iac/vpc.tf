@@ -83,7 +83,7 @@ resource "aws_route" "app_vpc_rt_pub_route01" {
   route_table_id         = aws_route_table.app_vpc_rt_pub.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.app_vpc_igw.id
-  depends_on             = ["aws_route_table.app_vpc_rt"]
+  depends_on             = [aws_route_table.app_vpc_rt]
 }
 resource "aws_route_table_association" "app_vpc_rt_pub_association_1" {
   subnet_id      = aws_subnet.public_subnet_1.id
