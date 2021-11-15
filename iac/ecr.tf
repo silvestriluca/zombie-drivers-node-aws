@@ -8,7 +8,7 @@ resource "aws_ecr_repository" "gateway_service" {
   tags = local.global_tags
 }
 
-resource "aws_ecr_repository" "gateway_service" {
+resource "aws_ecr_repository" "driver_location_service" {
   name                 = "zdriv-service-driver-location"
   image_tag_mutability = "MUTABLE"
 
@@ -18,7 +18,7 @@ resource "aws_ecr_repository" "gateway_service" {
   tags = local.global_tags
 }
 
-resource "aws_ecr_repository" "gateway_service" {
+resource "aws_ecr_repository" "zombie_detector_service" {
   name                 = "zdriv-service-zombie-detector"
   image_tag_mutability = "MUTABLE"
 
