@@ -1,3 +1,4 @@
+####### ECR #######
 resource "aws_ecr_repository" "gateway_service" {
   name                 = "zdriv-service-gateway"
   image_tag_mutability = "MUTABLE"
