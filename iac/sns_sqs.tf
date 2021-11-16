@@ -1,7 +1,7 @@
 ####### SNS #######
 resource "aws_sns_topic" "drivers_updates" {
   name              = "drivers-updates"
-  #kms_master_key_id = "alias/aws/sns"
+  kms_master_key_id = "alias/aws/sns"
   tags = local.global_tags
 }
 
