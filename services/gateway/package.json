@@ -2,9 +2,9 @@
   "name": "gateway-service",
   "version": "0.1.0",
   "description": "Gateway microservice for zombie drivers",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,9 @@
   "homepage": "https://github.com/silvestriluca/zombie-drivers-node-aws#readme",
   "devDependencies": {
     "eslint": "^8.3.0",
-    "mocha": "^9.1.3"
+    "jest": "^27.3.1"
+  },
+  "dependencies": {
+    "fastify": "^3.24.0"
   }
 }
