@@ -1,0 +1,9 @@
+# npm artifacts
+node_modules
+npm-debug.log
+# Code environment files
+jsconfig.json
+jest.config.js
+.eslintrc.json
+# Test files
+*.test.js
