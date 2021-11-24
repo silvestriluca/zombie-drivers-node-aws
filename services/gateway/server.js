@@ -9,7 +9,7 @@ const server = require('./microservice')({
 
 // Run the server!
 // eslint-disable-next-line no-unused-vars
-server.listen(3000, (err, address) => {
+server.listen(3000, '0.0.0.0', (err, address) => {
   if (err) {
     console.log(err);
     process.exit(1);
