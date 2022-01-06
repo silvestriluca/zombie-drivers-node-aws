@@ -22,6 +22,7 @@ phases:
     on-failure: ABORT
     commands:
       - echo "DOING NOTHING (WIP)"
+      - rm -rf .terraform terraform terraform_${TF_VERSION}_linux_amd64.zip
 
 artifacts:
   files:

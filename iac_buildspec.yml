@@ -5,6 +5,7 @@ phases:
     on-failure: ABORT
     commands:
       - echo "Commit ID - ${Commit_ID}"
+      - ls -la
       # Updates package repositories in image
       - apt-get -y -qq update
       # Installs Terraform version specified in CI/CD env variable. To hardcode a specific version, change the wget target.
