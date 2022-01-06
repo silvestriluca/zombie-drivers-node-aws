@@ -1,0 +1,47 @@
+version: 0.2
+        
+phases:
+  install:
+    on-failure: ABORT
+    commands:
+      - echo "Commit ID - ${Commit_ID}"
+      # Updates package repositories in image
+      - apt-get -y -qq update
+      # Installs Terraform version specified in CI/CD env variable. To hardcode a specific version, change the wget target.
+      - echo "Installing Terraform..."
+      - wget -q https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+      - unzip terraform_${TF_VERSION}_linux_amd64.zip
+      - cp terraform /usr/bin/terraform
+      - echo "Terraform Version:"
+      - terraform --version
+  pre_build:
+    on-failure: ABORT
+    commands:
+      # Restore remote by Retrieving remote state settings from AWS
+      - cd iac
+      - aws ssm get-parameter --name "/zdriv/default/tf-backend-config" --with-decryption | jq -r .Parameter.Value > backend.cfg
+      # Initialize Terraform
+      - terraform init -backend-config=backend.cfg
+
+  build:
+    on-failure: ABORT
+    commands:
+      - echo $Phase
+      - cd iac
+      - |
+        if expr "${Phase}" : "PLAN" >/dev/null;
+        then
+          echo "Lanunching PLAN..."
+          terraform plan -no-color -out=tfplan;
+        fi
+      - |
+        if expr "${Phase}" : "APPLY" >/dev/null;
+        then
+          echo "Building (APPLY)..."
+          terraform plan -no-color -out=tfplan && terraform apply -no-color -auto-approve=true tfplan;
+        fi
+  post_build:
+    on-failure: ABORT
+    commands:
+      - echo "Post build phase..."
+      - rm -rf .terraform terraform terraform_${TF_VERSION}_linux_amd64.zip
