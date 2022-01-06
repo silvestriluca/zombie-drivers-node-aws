@@ -44,6 +44,7 @@ phases:
     on-failure: ABORT
     commands:
       - echo "Post build phase..."
+      - cd ..
       - rm -rf .terraform terraform terraform_${TF_VERSION}_linux_amd64.zip
 
 artifacts:
