@@ -18,7 +18,6 @@ phases:
     on-failure: ABORT
     commands:
       # Restore remote by Retrieving remote state settings from AWS
-      - ls -la
       - cd iac
       - aws ssm get-parameter --name "/zdriv/default/tf-backend-config" --with-decryption | jq -r .Parameter.Value > backend.cfg
       # Initialize Terraform
@@ -28,7 +27,6 @@ phases:
     on-failure: ABORT
     commands:
       - echo $Phase
-      - cd iac
       - |
         if expr "${Phase}" : "PLAN" >/dev/null;
         then
