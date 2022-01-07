@@ -10,6 +10,7 @@ phases:
       #- echo "DOING NOTHING (WIP)"
       # Updates package repositories in image
       - apt-get -y -qq update
+      - n 16
 
   pre_build:
     on-failure: ABORT
