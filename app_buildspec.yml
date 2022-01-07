@@ -10,6 +10,7 @@ phases:
       #- echo "DOING NOTHING (WIP)"
       # Updates package repositories in image
       - apt-get -y -qq update
+      # FIX: Sets node version to v16.x (latest). Delete when CodeBuild image will support node 16 as runtime
       - n 16
 
   pre_build:
