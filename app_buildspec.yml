@@ -5,9 +5,9 @@ phases:
     on-failure: ABORT
     commands:
       - echo "Commit ID - ${Commit_ID}"
-      - echo "DOING NOTHING (WIP)"
+      #- echo "DOING NOTHING (WIP)"
       # Updates package repositories in image
-      #- apt-get -y -qq update
+      - apt-get -y -qq update
 
   pre_build:
     on-failure: ABORT
@@ -17,7 +17,31 @@ phases:
   build:
     on-failure: ABORT
     commands:
-      - echo "DOING NOTHING (WIP)"
+      - |
+        if expr "${Phase}" : "APP_BUILD" >/dev/null;
+        then
+          echo "Installing npm modules for gateway service..."
+          cd services/gateway
+          npm install;
+        fi
+      - |
+        if expr "${Phase}" : "APP_TEST" >/dev/null;
+        then
+          echo "Testing gateway service..."
+          cd services/gateway
+          npm test;
+        fi
+      - |
+        if expr "${Phase}" : "APP_PUBLISH" >/dev/null;
+        then
+          echo "Publishing gateway service in ECR..."
+          aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${Account_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+          cd services/gateway
+          docker build -t zdriv-service-gateway .
+          docker tag zdriv-service-gateway:latest ${Account_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/zdriv-service-gateway:latest
+          docker push ${Account_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/zdriv-service-gateway:latest;
+        fi
+        
   post_build:
     on-failure: ABORT
     commands:
