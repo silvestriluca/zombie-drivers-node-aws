@@ -3,6 +3,8 @@ version: 0.2
 phases:
   install:
     on-failure: ABORT
+    runtime-versions:
+      nodejs: latest
     commands:
       - echo "Commit ID - ${Commit_ID}"
       #- echo "DOING NOTHING (WIP)"
@@ -41,7 +43,7 @@ phases:
           docker tag zdriv-service-gateway:latest ${Account_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/zdriv-service-gateway:latest
           docker push ${Account_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/zdriv-service-gateway:latest;
         fi
-        
+
   post_build:
     on-failure: ABORT
     commands:
