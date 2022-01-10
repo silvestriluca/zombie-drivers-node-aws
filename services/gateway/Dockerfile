@@ -1,8 +1,10 @@
 # Dockerfile implementing Node best practices -> 
 # https://snyk.io/blog/10-best-practices-to-containerize-nodejs-web-applications-with-docker/
-FROM public.ecr.aws/docker/library/node:16.13.1
+
+# --------------> The build image
+FROM public.ecr.aws/docker/library/node:16.13.1 AS build
 # Install dumb-init (5. Properly handle events to safely terminate a Node.js Docker web application)
-RUN apt-get -y update && apt-get install -qqy dumb-init
+RUN apt-get -y update
 # Set env variable to production
 ENV NODE_ENV production
 # Create microservice directory
@@ -11,13 +13,26 @@ WORKDIR /usr/src/microservice
 COPY --chown=node:node package*.json ./
 # Install dependencies
 RUN npm ci --only=production
+
+# --------------> The production image
+FROM public.ecr.aws/docker/library/node:16.13.1-alpine
+# Install dumb-init
+RUN apk add dumb-init
+# Set env variable to production
+ENV NODE_ENV production
+# Sets limited user (node)
+USER node
+# Create microservice directory
+WORKDIR /usr/src/microservice
+# Copy libraires/node modules
+COPY --chown=node:node --from=build /usr/src/microservice/node_modules /usr/src/microservice/node_modules
 # Bundle microservice source
-COPY --chown=node:node . .
+COPY --chown=node:node . /usr/src/microservice
 # Open ports
 EXPOSE 3000
 # Set env variables
 ENV PORT=3000
 ENV HOST=0.0.0.0
 # Starts service
-USER node
+
 CMD [ "dumb-init", "node", "server.js" ]
