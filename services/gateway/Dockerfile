@@ -2,7 +2,7 @@
 # https://snyk.io/blog/10-best-practices-to-containerize-nodejs-web-applications-with-docker/
 FROM node:16.13.1
 # Install dumb-init (5. Properly handle events to safely terminate a Node.js Docker web application)
-RUN apt-get -y update && apt-get install -qqy dumb-init
+RUN apt-get -y update && apt-get upgrade -y && apt-get install -qqy dumb-init
 # Set env variable to production
 ENV NODE_ENV production
 # Create microservice directory
