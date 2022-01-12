@@ -38,7 +38,7 @@ phases:
         if expr "${Phase}" : "APPLY" >/dev/null;
         then
           echo "Building (APPLY)..."
-          terraform plan -no-color -out=tfplan && terraform apply -no-color -auto-approve=true tfplan;
+          terraform apply -no-color -auto-approve=true tfplan;
         fi
   post_build:
     on-failure: ABORT
