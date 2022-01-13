@@ -43,7 +43,7 @@ phases:
           cd services/gateway
           docker build -t zdriv-service-gateway .
           docker tag zdriv-service-gateway:latest ${Account_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/zdriv-service-gateway:latest
-          docker tag zdriv-service-gateway:latest ${Account_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/zdriv-service-gateway:${Commit_ID}
+          docker tag zdriv-service-gateway:latest ${Account_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/zdriv-service-gateway:$(Deployment_stage)-${Commit_ID}
           docker push --all-tags ${Account_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/zdriv-service-gateway
         fi
 
