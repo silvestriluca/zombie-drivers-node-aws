@@ -23,7 +23,7 @@ resource "aws_iam_role" "ecs_task_execution_role" {
 }
 EOF
 
-  tags = merge(local.global_tags, { stage = local.deploy_stage })
+  tags = local.global_tags
 }
 
 resource "aws_iam_role_policy_attachment" "managed_ecs_task_execution_policy" {
@@ -50,7 +50,7 @@ resource "aws_iam_role" "task_gateway_service_role" {
 }
 EOF
 
-  tags = merge(local.global_tags, { stage = local.deploy_stage })
+  tags = local.global_tags
 }
 
 resource "aws_iam_role_policy" "task_gateway_service_policy" {
@@ -99,7 +99,7 @@ data "aws_kms_alias" "sns" {
 resource "aws_cloudwatch_log_group" "gateway_service" {
   name              = "/aws/ecs/${var.app_name_prefix}/${local.deploy_stage}/gateway-service"
   retention_in_days = 60
-  tags              = merge(local.global_tags, { stage = local.deploy_stage })
+  tags              = local.global_tags
 }
 
 ####### ECS #######
@@ -123,7 +123,7 @@ resource "aws_ecs_cluster" "microservices" {
     value = "enabled"
   }
 
-  tags = merge(local.global_tags, { stage = local.deploy_stage })
+  tags = local.global_tags
 }
 
 resource "aws_ecs_task_definition" "gateway" {
@@ -170,7 +170,5 @@ resource "aws_ecs_task_definition" "gateway" {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64"
   }
-  tags = merge(local.global_tags, { stage = local.deploy_stage, microservice = "${var.app_name_prefix}-gateway-service" })
+  tags = merge(local.global_tags, { microservice = "${var.app_name_prefix}-gateway-service" })
 }
-
-

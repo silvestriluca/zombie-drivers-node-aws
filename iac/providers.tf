@@ -15,7 +15,7 @@ provider "aws" {
     tags = {
       environment  = var.environment
       service      = var.app_name_verbose
-      stage        = var.stage
+      stage        = local.deploy_stage
       repository   = var.app_repository_name
       tf-workspace = terraform.workspace
     }

@@ -14,7 +14,7 @@ variable "app_name_prefix" {
 variable "app_repository_name" {
   type        = string
   description = "Name of the repositoy where the IaC and/or app/service code is stored"
-  default = "github/zombie-drivers-node-aws"
+  default     = "github/zombie-drivers-node-aws"
 }
 
 variable "aws_region" {
@@ -29,10 +29,13 @@ variable "environment" {
   default     = "application/microservices"
 }
 
-variable "stage" {
-  type        = string
-  description = "Name of the stage in which the app/service will be deployed (e.g. dev, int, prod, test, ephemeral, canary, RC, seed)"
-  default     = "dev"
+variable "workspace_stage_map" {
+  type        = map(string)
+  description = "Map between terraform workspaces (e.g. default) and deploy stages in which app/service will be deployed (e.g. dev, int, prod, test, ephemeral, canary, RC, seed)"
+  default = {
+    default = "dev"
+    prod    = "prod"
+  }
 }
 
 ####### VPC VARIABLES #######
