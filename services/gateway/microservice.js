@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// Requires standard libraries
+
 // Require the framework and instantiate it
 const fastify = require('fastify');
 // Requires SNS Class
