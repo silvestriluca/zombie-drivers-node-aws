@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const querystring = require('querystring');
 const process = require('process');
 // Defines Port and Host of the microservice
 const PORT = parseInt(process.env.PORT, 10) || 3000;
@@ -10,6 +11,7 @@ const server = require('./microservice')({
   logger: {
     level: 'info',
   },
+  querystringParser: (str) => querystring.parse(str.toLowerCase()),
 });
 
 // Run the server!
