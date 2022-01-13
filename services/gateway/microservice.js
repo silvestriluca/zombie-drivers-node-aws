@@ -28,7 +28,6 @@ function build(opts = {}) {
   // Root route
   // eslint-disable-next-line no-unused-vars
   app.get('/', async (request, reply) => {
-    console.log(request.query);
     if (request.query.debug === 'true') {
       return { hello: 'world', debug: debugHelpers.getIpMap() };
     }
