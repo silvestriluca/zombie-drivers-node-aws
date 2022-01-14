@@ -22,7 +22,7 @@ phases:
       - cd iac
       - aws ssm get-parameter --name "/zdriv/default/tf-backend-config" --with-decryption | jq -r .Parameter.Value > backend.cfg
       # Initialize Terraform
-      - terraform init -backend-config=backend.cfg
+      - terraform init -backend-config=backend.cfg -no-color
 
   build:
     on-failure: ABORT
