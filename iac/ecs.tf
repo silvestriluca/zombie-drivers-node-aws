@@ -88,7 +88,7 @@ resource "aws_iam_role_policy" "task_gateway_service_policy" {
 EOF
 }
 
-####### KMS #######
+################## KMS ##################
 
 data "aws_kms_alias" "sns" {
   name = "alias/aws/sns"
@@ -102,7 +102,16 @@ resource "aws_cloudwatch_log_group" "gateway_service" {
   tags              = local.global_tags
 }
 
-####### ECS #######
+################## SERVICE DISCOVERY ##################
+
+resource "aws_service_discovery_private_dns_namespace" "zombie_services" {
+  name        = "zdrivers-${local.deploy_stage}.local"
+  description = "Zombie drivers services - ${local.deploy_stage}"
+  vpc         = aws_vpc.app_vpc.id
+  tags        = local.global_tags
+}
+
+################## ECS ##################
 
 resource "aws_ecs_account_setting_default" "cluster_account" {
   name  = "containerInsights"
