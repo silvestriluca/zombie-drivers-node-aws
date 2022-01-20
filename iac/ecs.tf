@@ -111,73 +111,34 @@ resource "aws_service_discovery_private_dns_namespace" "zombie_services" {
   tags        = local.global_tags
 }
 
-################## SSM PARAMETER STORE ##################
+################## ECS SECURITY GROUPS & RULES ##################
 
-resource "aws_ssm_parameter" "alb_switch" {
-  name  = "/${var.app_name_prefix}/${terraform.workspace}/alb-switch-${local.deploy_stage}"
-  type  = "SecureString"
-  value = "false"
-  tags  = local.global_tags
-
-  lifecycle {
-    ignore_changes = [
-      value,
-    ]
-  }
+resource "aws_security_group" "ecs_gateway_service" {
+  name                   = "ECS-gateway-service-${local.deploy_stage}-SG"
+  description            = "Gateway service security group (${local.deploy_stage})"
+  vpc_id                 = aws_vpc.app_vpc.id
+  revoke_rules_on_delete = true
+  tags                   = local.global_tags
 }
 
-################## ALB ##################
-#TODO
-resource "aws_lb" "drivers_alb" {
-  count              = aws_ssm_parameter.alb_switch.value == "true" ? 1 : 0
-  name               = "drivers-alb-${local.deploy_stage}"
-  internal           = false
-  load_balancer_type = "application"
-  #security_groups    = [aws_security_group.lb_sg.id]
-  subnets = [
-    aws_subnet.public_subnet_1.id,
-    aws_subnet.public_subnet_2.id,
-    aws_subnet.public_subnet_3.id,
-    aws_subnet.private_subnet_1.id,
-    aws_subnet.private_subnet_2.id,
-    aws_subnet.private_subnet_3.id
-  ]
-
-  enable_deletion_protection = false
-
-  access_logs {
-    bucket  = aws_s3_bucket.alb_access_logs_bucket.bucket
-    prefix  = "drivers-alb-${local.deploy_stage}-"
-    enabled = true
-  }
-
-  tags = local.global_tags
+resource "aws_security_group_rule" "ecs_gateway_in" {
+  description              = "ALB2ECS Gateway IN"
+  type                     = "ingress"
+  from_port                = 3000
+  to_port                  = 3000
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.alb.id
+  security_group_id        = aws_security_group.ecs_gateway_service.id
 }
 
-################## S3 (ALB Access logs) ##################
-
-resource "aws_s3_bucket" "alb_access_logs_bucket" {
-  bucket_prefix = "${var.app_name_prefix}-alb-logs-${local.deploy_stage}"
-  acl           = "private"
-  force_destroy = true
-  # Uses aws/s3 KMS key
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "aws:kms"
-      }
-      bucket_key_enabled = true
-    }
-  }
-  tags = local.global_tags
-}
-
-resource "aws_s3_bucket_public_access_block" "alb_access_logs_bucket" {
-  bucket                  = aws_s3_bucket.alb_access_logs_bucket.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+resource "aws_security_group_rule" "ecs_gateway_out" {
+  description              = "ECS2ALB Gateway OUT"
+  type                     = "egress"
+  from_port                = 3000
+  to_port                  = 3000
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.alb.id
+  security_group_id        = aws_security_group.ecs_gateway_service.id
 }
 
 ################## ECS ##################
@@ -249,4 +210,47 @@ resource "aws_ecs_task_definition" "gateway" {
     cpu_architecture        = "X86_64"
   }
   tags = merge(local.global_tags, { microservice = "${var.app_name_prefix}-gateway-service" })
+}
+
+resource "aws_ecs_service" "gateway" {
+  name            = "gateway-service-${local.deploy_stage}"
+  cluster         = aws_ecs_cluster.microservices.id
+  task_definition = aws_ecs_task_definition.gateway.arn
+  desired_count   = 2
+
+  ordered_placement_strategy {
+    type  = "binpack"
+    field = "cpu"
+  }
+
+  network_configuration {
+    subnets = [
+      aws_subnet.public_subnet_1.id,
+      aws_subnet.public_subnet_2.id,
+      aws_subnet.public_subnet_3.id
+    ]
+    security_groups     = [aws_security_group.ecs_gateway_service.id]
+    assassign_public_ip = false
+  }
+
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
+  }
+
+  service_registries {
+    registry_arn = aws_service_discovery_private_dns_namespace.zombie_services.arn
+
+  }
+
+  dynamic "load_balancer" {
+    for_each = aws_lb.drivers_alb
+    content {
+      target_group_arn = aws_lb_target_group.drivers_cluster.arn
+      container_name   = "gateway"
+      container_port   = 3000
+    }
+  }
+
+  tags = local.global_tags
 }
