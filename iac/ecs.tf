@@ -219,8 +219,13 @@ resource "aws_ecs_service" "gateway" {
   desired_count   = 2
 
   ordered_placement_strategy {
+    type  = "spread"
+    field = "attribute:ecs.availability-zone"
+  }
+
+  ordered_placement_strategy {
     type  = "binpack"
-    field = "cpu"
+    field = "memory"
   }
 
   network_configuration {
