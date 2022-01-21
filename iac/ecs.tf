@@ -217,7 +217,7 @@ resource "aws_ecs_task_definition" "gateway" {
         }
       ]
       healthCheck = {
-        command     = ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+        command     = ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
         interval    = 60
         timeout     = 20
         retries     = 3
@@ -276,7 +276,7 @@ resource "aws_ecs_service" "gateway" {
       aws_subnet.public_subnet_3.id
     ]
     security_groups  = [aws_security_group.ecs_gateway_service.id]
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   deployment_circuit_breaker {
