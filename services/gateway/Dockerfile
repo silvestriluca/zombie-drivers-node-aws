@@ -17,7 +17,7 @@ RUN npm ci --only=production
 # --------------> The production image
 FROM public.ecr.aws/docker/library/node:16.13.1-alpine
 # Install dumb-init
-RUN apk add dumb-init
+RUN apk add --update dumb-init curl
 # Set env variable to production
 ENV NODE_ENV production
 # Sets limited user (node)
