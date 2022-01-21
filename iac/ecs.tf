@@ -228,10 +228,10 @@ resource "aws_ecs_task_definition" "gateway" {
       ]
       healthCheck = {
         command     = ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
-        interval    = 60
-        timeout     = 20
+        interval    = 30
+        timeout     = 5
         retries     = 3
-        startPeriod = 120
+        startPeriod = 30
       }
       logConfiguration = {
         logDriver = "awslogs"
