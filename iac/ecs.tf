@@ -213,10 +213,11 @@ resource "aws_ecs_task_definition" "gateway" {
 }
 
 resource "aws_ecs_service" "gateway" {
-  name            = "gateway-service-${local.deploy_stage}"
-  cluster         = aws_ecs_cluster.microservices.id
-  task_definition = aws_ecs_task_definition.gateway.arn
-  desired_count   = 2
+  name                 = "gateway-service-${local.deploy_stage}"
+  cluster              = aws_ecs_cluster.microservices.id
+  task_definition      = aws_ecs_task_definition.gateway.arn
+  desired_count        = 2
+  force_new_deployment = true
 
   ordered_placement_strategy {
     type  = "spread"
