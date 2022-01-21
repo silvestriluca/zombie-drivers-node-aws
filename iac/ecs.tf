@@ -149,6 +149,7 @@ resource "aws_security_group_rule" "ecs_gateway_in" {
   security_group_id        = aws_security_group.ecs_gateway_service.id
 }
 
+/*
 resource "aws_security_group_rule" "self" {
   description       = "Localhost Gateway IN"
   type              = "ingress"
@@ -158,6 +159,7 @@ resource "aws_security_group_rule" "self" {
   self              = true
   security_group_id = aws_security_group.ecs_gateway_service.id
 }
+*/
 
 resource "aws_security_group_rule" "ecs_gateway_out_all" {
   description       = "ECS Gateway ALL OUT"
