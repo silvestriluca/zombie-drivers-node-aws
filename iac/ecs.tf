@@ -111,6 +111,24 @@ resource "aws_service_discovery_private_dns_namespace" "zombie_services" {
   tags        = local.global_tags
 }
 
+resource "aws_service_discovery_service" "gateway_service" {
+  name          = "gateway"
+  description   = "Gateway service for Zombie Driver - ${local.deploy_stage}"
+  force_destroy = true
+  dns_config {
+    namespace_id   = aws_service_discovery_private_dns_namespace.zombie_services.id
+    routing_policy = "WEIGHTED"
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+  }
+  health_check_custom_config {
+    failure_threshold = 3
+  }
+  tags = local.global_tags
+}
+
 ################## ECS SECURITY GROUPS & RULES ##################
 
 resource "aws_security_group" "ecs_gateway_service" {
@@ -249,7 +267,7 @@ resource "aws_ecs_service" "gateway" {
   }
 
   service_registries {
-    registry_arn = aws_service_discovery_private_dns_namespace.zombie_services.arn
+    registry_arn = aws_service_discovery_service.gateway_service.arn
 
   }
 
