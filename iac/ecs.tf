@@ -149,7 +149,18 @@ resource "aws_security_group_rule" "ecs_gateway_in" {
   security_group_id        = aws_security_group.ecs_gateway_service.id
 }
 
-resource "aws_security_group_rule" "ecs_gateway_out" {
+resource "aws_security_group_rule" "ecs_gateway_out_all" {
+  description       = "ECS Gateway ALL OUT"
+  type              = "egress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
+  security_group_id = aws_security_group.ecs_gateway_service.id
+}
+
+resource "aws_security_group_rule" "ecs_gateway_out_alb" {
   description              = "ECS2ALB Gateway OUT"
   type                     = "egress"
   from_port                = 3000

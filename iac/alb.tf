@@ -159,3 +159,14 @@ resource "aws_security_group_rule" "alb_out_ecs_gateway" {
   source_security_group_id = aws_security_group.ecs_gateway_service.id
   security_group_id        = aws_security_group.alb.id
 }
+
+resource "aws_security_group_rule" "alb_out_all" {
+  description       = "ALB All OUT"
+  type              = "egress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
+  security_group_id = aws_security_group.alb.id
+}
