@@ -149,6 +149,16 @@ resource "aws_security_group_rule" "ecs_gateway_in" {
   security_group_id        = aws_security_group.ecs_gateway_service.id
 }
 
+resource "aws_security_group_rule" "self" {
+  description       = "Localhost Gateway IN"
+  type              = "ingress"
+  from_port         = 3000
+  to_port           = 3000
+  protocol          = "tcp"
+  self              = true
+  security_group_id = aws_security_group.ecs_gateway_service.id
+}
+
 resource "aws_security_group_rule" "ecs_gateway_out_all" {
   description       = "ECS Gateway ALL OUT"
   type              = "egress"
@@ -206,9 +216,9 @@ resource "aws_ecs_task_definition" "gateway" {
     {
       name              = "gateway"
       image             = "${aws_ecr_repository.gateway_service.repository_url}:latest"
-      cpu               = 512
-      memory            = 1024
-      memoryReservation = 512
+      cpu               = 256
+      memory            = 512
+      memoryReservation = 256
       essential         = true
       portMappings = [
         {
