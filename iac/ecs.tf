@@ -229,8 +229,8 @@ resource "aws_ecs_service" "gateway" {
       aws_subnet.public_subnet_2.id,
       aws_subnet.public_subnet_3.id
     ]
-    security_groups     = [aws_security_group.ecs_gateway_service.id]
-    assassign_public_ip = false
+    security_groups  = [aws_security_group.ecs_gateway_service.id]
+    assign_public_ip = false
   }
 
   deployment_circuit_breaker {
