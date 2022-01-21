@@ -31,7 +31,7 @@ phases:
       - |
         if expr "${Phase}" : "PLAN" >/dev/null;
         then
-          echo "Lanunching PLAN..."
+          echo "Launching PLAN..."
           terraform plan -no-color -out=tfplan;
         fi
       - |
