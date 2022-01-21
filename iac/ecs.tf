@@ -241,6 +241,7 @@ resource "aws_ecs_service" "gateway" {
     type = "ECS"
   }
 
+  /* Placement strategies are not supported in Fargate
   ordered_placement_strategy {
     type  = "spread"
     field = "attribute:ecs.availability-zone"
@@ -250,6 +251,7 @@ resource "aws_ecs_service" "gateway" {
     type  = "binpack"
     field = "memory"
   }
+*/
 
   network_configuration {
     subnets = [
