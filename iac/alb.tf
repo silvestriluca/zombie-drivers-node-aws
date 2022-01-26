@@ -8,10 +8,7 @@ resource "aws_lb" "drivers_alb" {
   subnets = [
     aws_subnet.public_subnet_1.id,
     aws_subnet.public_subnet_2.id,
-    aws_subnet.public_subnet_3.id,
-    aws_subnet.private_subnet_1.id,
-    aws_subnet.private_subnet_2.id,
-    aws_subnet.private_subnet_3.id
+    aws_subnet.public_subnet_3.id
   ]
 
   enable_deletion_protection = false
@@ -19,7 +16,7 @@ resource "aws_lb" "drivers_alb" {
 
   access_logs {
     bucket  = aws_s3_bucket.alb_access_logs_bucket.bucket
-    prefix  = "drivers-alb-${local.deploy_stage}-"
+    prefix  = "drivers-alb-${local.deploy_stage}"
     enabled = true
   }
 
@@ -61,13 +58,12 @@ resource "aws_lb_listener" "drivers_alb_https" {
 
 resource "aws_lb_target_group" "drivers_cluster" {
   name        = "drivers-cluster-${local.deploy_stage}-tg"
-  target_type = "instance"
+  target_type = "ip"
   port        = 3000
   protocol    = "HTTP"
   vpc_id      = aws_vpc.app_vpc.id
   tags        = local.global_tags
 }
-
 
 ################## S3 (ALB Access logs) ##################
 
@@ -93,6 +89,46 @@ resource "aws_s3_bucket_public_access_block" "alb_access_logs_bucket" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_policy" "alb_access_logs_bucket_policy" {
+  bucket = aws_s3_bucket.alb_access_logs_bucket.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${local.elb_account_id[var.aws_region]}:root"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "${aws_s3_bucket.alb_access_logs_bucket.arn}/drivers-alb-${local.deploy_stage}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "delivery.logs.amazonaws.com"
+      },
+      "Action": "s3:PutObject",
+      "Resource":  "${aws_s3_bucket.alb_access_logs_bucket.arn}/drivers-alb-${local.deploy_stage}/AWSLogs/${data.aws_caller_identity.current.account_id}/*",
+      "Condition": {
+        "StringEquals": {
+          "s3:x-amz-acl": "bucket-owner-full-control"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "delivery.logs.amazonaws.com"
+      },
+      "Action": "s3:GetBucketAcl",
+      "Resource": "${aws_s3_bucket.alb_access_logs_bucket.arn}"
+    }
+  ]
+}
+EOF
 }
 
 ################## ALB SECURITY GROUPS & RULES ##################
