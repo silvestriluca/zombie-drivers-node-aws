@@ -1,4 +1,4 @@
-################## SSM PARAMETER STORE (ALB ON/OFF SWITCH) ##################
+################## SSM PARAMETER STORE (ONLINE ON/OFF SWITCH) ##################
 
 resource "aws_ssm_parameter" "online_switch" {
   name  = "/${var.app_name_prefix}/${terraform.workspace}/online-switch-${local.deploy_stage}"
