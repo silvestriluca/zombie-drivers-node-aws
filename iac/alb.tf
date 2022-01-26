@@ -1,21 +1,6 @@
-################## SSM PARAMETER STORE (ALB ON/OFF SWITCH) ##################
-
-resource "aws_ssm_parameter" "alb_switch" {
-  name  = "/${var.app_name_prefix}/${terraform.workspace}/alb-switch-${local.deploy_stage}"
-  type  = "SecureString"
-  value = "false"
-  tags  = local.global_tags
-
-  lifecycle {
-    ignore_changes = [
-      value,
-    ]
-  }
-}
-
 ################## ALB ##################
 resource "aws_lb" "drivers_alb" {
-  count              = aws_ssm_parameter.alb_switch.value == "true" ? 1 : 0
+  count              = aws_ssm_parameter.online_switch.value == "true" ? 1 : 0
   name               = "drivers-alb-${local.deploy_stage}"
   internal           = false
   load_balancer_type = "application"
@@ -42,7 +27,7 @@ resource "aws_lb" "drivers_alb" {
 }
 
 resource "aws_lb_listener" "drivers_alb_http" {
-  count             = aws_ssm_parameter.alb_switch.value == "true" ? 1 : 0
+  count             = aws_ssm_parameter.online_switch.value == "true" ? 1 : 0
   load_balancer_arn = aws_lb.drivers_alb[0].arn
   port              = "80"
   protocol          = "HTTP"
@@ -62,7 +47,7 @@ resource "aws_lb_listener" "drivers_alb_http" {
 
 
 resource "aws_lb_listener" "drivers_alb_https" {
-  count             = aws_ssm_parameter.alb_switch.value == "true" ? 1 : 0
+  count             = aws_ssm_parameter.online_switch.value == "true" ? 1 : 0
   load_balancer_arn = aws_lb.drivers_alb[0].arn
   port              = "443"
   protocol          = "HTTPS"

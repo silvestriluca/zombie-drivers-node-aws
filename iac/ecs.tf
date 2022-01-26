@@ -257,7 +257,7 @@ resource "aws_ecs_service" "gateway" {
   name                 = "gateway-service-${local.deploy_stage}"
   cluster              = aws_ecs_cluster.microservices.id
   task_definition      = aws_ecs_task_definition.gateway.arn
-  desired_count        = aws_ssm_parameter.alb_switch.value == "true" ? 2 : 0
+  desired_count        = aws_ssm_parameter.online_switch.value == "true" ? 2 : 0
   force_new_deployment = true
 
   deployment_controller {
