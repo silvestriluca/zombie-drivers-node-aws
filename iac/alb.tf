@@ -1,6 +1,6 @@
 ################## ALB ##################
 resource "aws_lb" "drivers_alb" {
-  count              = aws_ssm_parameter.online_switch.value == "true" ? 1 : 0
+  count              = local.go_online ? 1 : 0
   name               = "drivers-alb-${local.deploy_stage}"
   internal           = false
   load_balancer_type = "application"
@@ -24,7 +24,7 @@ resource "aws_lb" "drivers_alb" {
 }
 
 resource "aws_lb_listener" "drivers_alb_http" {
-  count             = aws_ssm_parameter.online_switch.value == "true" ? 1 : 0
+  count             = local.go_online ? 1 : 0
   load_balancer_arn = aws_lb.drivers_alb[0].arn
   port              = "80"
   protocol          = "HTTP"
@@ -44,10 +44,11 @@ resource "aws_lb_listener" "drivers_alb_http" {
 
 
 resource "aws_lb_listener" "drivers_alb_https" {
-  count             = aws_ssm_parameter.online_switch.value == "true" ? 1 : 0
+  count             = local.go_online ? 1 : 0
   load_balancer_arn = aws_lb.drivers_alb[0].arn
   port              = "443"
   protocol          = "HTTPS"
+  certificate_arn   = data.aws_acm_certificate.zombie_driver[0].arn
   ssl_policy        = "ELBSecurityPolicy-2016-08"
 
   default_action {
