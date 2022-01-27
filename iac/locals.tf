@@ -31,5 +31,6 @@ locals {
   global_tags = {
     account_id = data.aws_caller_identity.current.account_id
   }
-  go_online = lower(aws_ssm_parameter.online_switch.value) == "true" && lower(aws_ssm_parameter.dns_public_zone.value != "example.com")
+  go_online        = lower(aws_ssm_parameter.online_switch.value) == "true" && lower(aws_ssm_parameter.dns_public_zone.value != "example.com")
+  vpc_endpoints_on = local.go_online
 }

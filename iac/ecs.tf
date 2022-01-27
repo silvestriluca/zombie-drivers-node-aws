@@ -94,12 +94,68 @@ data "aws_kms_alias" "sns" {
   name = "alias/aws/sns"
 }
 
-################## CLOUDWATCH ##################
+################## CLOUDWATCH & CW VPC ENDPOINTS / SECURITY GROUPS ##################
 
 resource "aws_cloudwatch_log_group" "gateway_service" {
   name              = "/aws/ecs/${var.app_name_prefix}/${local.deploy_stage}/gateway-service"
   retention_in_days = 60
   tags              = local.global_tags
+}
+
+resource "aws_security_group" "cw_vpc_endpoint" {
+  name                   = "CW-vpc-endpoint-${local.deploy_stage}-SG"
+  description            = "CW private endpoint SG (${local.deploy_stage})"
+  vpc_id                 = aws_vpc.app_vpc.id
+  revoke_rules_on_delete = true
+  tags                   = local.global_tags
+}
+
+resource "aws_security_group_rule" "cw_vpc_endpoints_in" {
+  description       = "CW VPC Endpoint IN (VPC LAN)"
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = [var.vpc_cidr]
+  security_group_id = aws_security_group.cw_vpc_endpoint.id
+}
+
+resource "aws_security_group_rule" "cw_vpc_endpoints_out" {
+  description       = "CW VPC Endpoint OUT (ALL/Everywhere)"
+  type              = "egress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
+  security_group_id = aws_security_group.cw_vpc_endpoint.id
+}
+
+resource "aws_vpc_endpoint" "cw" {
+  count               = local.vpc_endpoints_on ? 1 : 0
+  vpc_id              = aws_vpc.app_vpc.id
+  service_name        = "com.amazonaws.${var.aws_region}.logs"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = [aws_subnet.private_subnet_1.id, aws_subnet.private_subnet_2.id]
+  security_group_ids  = [aws_security_group.cw_vpc_endpoint.id]
+  policy              = <<EOF
+{
+  "Statement": [
+    {
+      "Sid": "PutOnly",
+      "Principal": "*",
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+  tags                = local.global_tags
 }
 
 ################## SERVICE DISCOVERY ##################
@@ -288,7 +344,7 @@ resource "aws_ecs_service" "gateway" {
       aws_subnet.public_subnet_3.id
     ]
     security_groups  = [aws_security_group.ecs_gateway_service.id]
-    assign_public_ip = true
+    assign_public_ip = !local.vpc_endpoints_on
   }
 
   deployment_circuit_breaker {
