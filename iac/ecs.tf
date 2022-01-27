@@ -98,7 +98,7 @@ data "aws_kms_alias" "sns" {
 
 resource "aws_cloudwatch_log_group" "gateway_service" {
   name              = "/aws/ecs/${var.app_name_prefix}/${local.deploy_stage}/gateway-service"
-  retention_in_days = 60
+  retention_in_days = 14
   tags              = local.global_tags
 }
 
