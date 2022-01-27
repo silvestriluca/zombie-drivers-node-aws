@@ -29,3 +29,18 @@ data "aws_route53_zone" "dns_public_zone" {
   name  = aws_ssm_parameter.dns_public_zone.value
 }
 
+################## DNS RECORDS ##################
+
+# ALB Alias record
+resource "aws_route53_record" "alb_public" {
+  count   = local.go_online ? 1 : 0
+  zone_id = data.aws_route53_zone.dns_public_zone[0].zone_id
+  name    = "${local.deploy_stage}.zdriver"
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.drivers_alb[0].dns_name
+    zone_id                = aws_lb.drivers_alb[0].zone_id
+    evaluate_target_health = true
+  }
+}
