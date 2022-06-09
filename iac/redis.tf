@@ -49,7 +49,7 @@ resource "aws_elasticache_replication_group" "example" {
   replication_group_description = "driver-location Redis replica group"
   node_type                     = "cache.t3.micro"
   number_cache_clusters         = 3
-  apply_apply_immediately       = true
+  apply_immediately             = true
   at_rest_encryption_enabled    = true
   engine                        = "redis"
   engine_version                = "6.x"
